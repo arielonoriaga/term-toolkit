@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](https://github.com/mokkapps/changelog-generator-demo/compare/v0.3.0...v0.3.1) (2024-07-10)
+
+
+### Bug Fixes
+
+* add build steep on postinstall ([0dc9a8b](https://github.com/mokkapps/changelog-generator-demo/commits/0dc9a8bfd301ecebb85c737701ec1c56a1b1e9ed))
+
 ## [0.3.0](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.6...v0.3.0) (2024-07-10)
 
 
