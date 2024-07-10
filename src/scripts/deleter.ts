@@ -1,20 +1,28 @@
 import { homedir } from "os";
 import { readdir, unlink } from "fs/promises";
 import { join, isAbsolute } from "path";
+import {isEven} from "./utils/numbers";
 
- export const listAndDeleteFiles = async (directory: string): Promise<void> => {
+const _deleter = async (directory: string, even: boolean): Promise<void> => {
+  const shouldBeDeleted = (index: number): boolean =>  even
+    ? isEven(index)
+    : !isEven(index);
+
   try {
     const files: string[] = await readdir(directory);
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const filePath = join(directory, file);
-      if (i % 2 !== 0) { // If the index is not even
+
+      if (shouldBeDeleted(i)) {
         try {
-          await unlink(filePath); // Delete the file
+          await unlink(filePath);
           console.log(`Deleted file: ${filePath}`);
         } catch (err) {
           console.error(`Error deleting file ${filePath}:`, err);
         }
+
       } else {
         console.log(`Kept file: ${filePath}`);
       }
@@ -24,19 +32,19 @@ import { join, isAbsolute } from "path";
   }
 }
 
-const args: string[] = process.argv.slice(2);
-if (args.length === 0) {
-  console.error("Please provide a directory path as an argument.");
-  process.exit(1);
-}
+export const deleter = async (directory: string, even: boolean): Promise<void> => {
+  if (!directory) {
+    console.error("Please provide a directory path.");
+    process.exit(1);
+  }
 
-let directoryPath: string = args[0];
+  if (directory.startsWith('~')) {
+    directory = join(homedir(), directory.slice(1));
+  }
 
-if (directoryPath.startsWith('~')) {
-  directoryPath = join(homedir(), directoryPath.slice(1));
-}
+  if (!isAbsolute(directory)) {
+    directory = join(process.cwd(), directory);
+  }
 
-if (!isAbsolute(directoryPath)) {
-  directoryPath = join(process.cwd(), directoryPath);
+  _deleter(directory);
 }
-listAndDeleteFiles(directoryPath);
