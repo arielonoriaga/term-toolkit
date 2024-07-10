@@ -53,7 +53,7 @@ export const optimize = async (args: CLIArgs): Promise<void> => {
     process.exit(1);
   }
 
-  quality = args.quality || 80;
+  quality = +(args.quality || 80);
 
   stat(args.inputPath)
     .then(fileStat => {
