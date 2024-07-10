@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.7](https://github.com/mokkapps/changelog-generator-demo/compare/v0.3.6...v0.3.7) (2024-07-10)
+
+
+### Features
+
+* **images:** add support for other formats in image optimizer ([ec0413e](https://github.com/mokkapps/changelog-generator-demo/commits/ec0413e466133879fc9bcacaa36ec144d1dc0f72))
+* **types:** improve typechecking ([5d3aa75](https://github.com/mokkapps/changelog-generator-demo/commits/5d3aa75691a38e6640ee8c92a10ecb4c43d9df2d))
+
 ### [0.3.6](https://github.com/mokkapps/changelog-generator-demo/compare/v0.3.5...v0.3.6) (2024-07-10)
 
 
