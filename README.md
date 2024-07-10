@@ -1,5 +1,12 @@
 # CLI Tool Built with Bun.js
-This is a CLI tool built using Bun.js, designed for common file operations such as deleting, renaming, and optimizing files in a directory.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Description
+The CLI tool offers several commands, each with its own description and options. The commands include:
+- deleter: Delete files by specified index criteria (either even or odd).
+- renamer: Rename files by specified index criteria (either even or odd).
+- optimizer: Optimize files by specified index criteria (either even or odd).
 
 ## Installation
 To install the CLI tool, use the npm package manager:
@@ -45,3 +52,7 @@ Rename files by specified index criteria (either even or odd).
 your-cli-tool renamer [options]
 ```
 Rename files in a sequence, for example: file01.txt, file02.txt, ..., file10.txt.
+
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
