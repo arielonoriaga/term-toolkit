@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.2...v0.2.3) (2024-07-10)
+
+
+* add eslint ([bd94be2](https://github.com/mokkapps/changelog-generator-demo/commits/bd94be25ff9bef11d5bde9bb9cf0e4436c669ccd))
+* remove binary file from package ([b90e0a6](https://github.com/mokkapps/changelog-generator-demo/commits/b90e0a67329fd372180f32b23d6f0ce56d1bd1ef))
+
 ### [0.2.2](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.1...v0.2.2) (2024-07-10)
 
 ### [0.2.1](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.0...v0.2.1) (2024-07-10)
