@@ -1,8 +1,15 @@
 {
-  "name": "cli-tools",
-  "module": "index.ts",
+  "name": "termkit",
+  "module": "src/index.ts",
+  "author": "Ariel Onoriaga",
+  "license": "MIT",
+  "description": "A CLI tool that offers several commands to help you with your daily tasks.",
   "version": "0.0.4",
   "type": "module",
+  "main": "dist/termkit",
+  "bin": {
+    "termkit": "./dist/termkit"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.14.10",
@@ -10,6 +17,8 @@
     "standard-version": "^9.5.0"
   },
   "scripts": {
+    "prepublishOnly": "bun run build",
+    "build": "bun build ./src/index.ts --minify --compile --outfile=./dist/termkit",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
