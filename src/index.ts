@@ -55,7 +55,7 @@ program
   .description('Clone a repository and optionally reset its history')
   .argument('<repoUrl>', 'Repository URL')
   .option('--no-reset', 'Do not reset the history')
-  .option('-o, --output <output>', 'Output folder')
+  .option('-o, --output <output>', 'Output folder', 'will be the repository name')
   .action((repoUrl, options) => {
     import('./scripts/git').then(({ cloneRepo }) => {
       cloneRepo({
