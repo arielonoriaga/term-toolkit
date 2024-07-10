@@ -26,9 +26,9 @@ program
   .description('Rename files by index, for example: file01.txt, file02.txt, ..., file10.txt')
   .argument('<newName>', 'New name for the files')
   .option('-d, --directory <directory>', 'Directory path', '.')
-  .action((directory, newName) => {
+  .action((newName, options) => {
     import('./scripts/rename-sequence').then(({ renameFiles }) => {
-      renameFiles(directory, newName);
+      renameFiles(options.directory, newName);
     });
   })
 
