@@ -4,7 +4,7 @@
   "author": "Ariel Onoriaga",
   "license": "MIT",
   "description": "A CLI tool that offers several commands to help you with your daily tasks.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "type": "module",
   "bin": {
     "term-toolkit": "./dist/term-toolkit",
