@@ -49,5 +49,5 @@ export const renameFiles = async (directory: string, baseName: string): Promise<
     directory = join(process.cwd(), directory);
   }
 
-  renameFiles(directory, baseName);
+  _renameFiles(directory, baseName);
 }

@@ -37,11 +37,14 @@ program
   .argument('<directory>', 'Directory path')
   .option('-q, --quality <quality>', 'Quality of the image', '80')
   .option('-o, --output <output>', 'Output directory')
+  .option('--keep-original', 'Keep the original image', true)
   .action((directory, options) => {
     import('./scripts/optimizer').then(({ optimize }) => {
       optimize({
         inputPath: directory,
-        ...options
+        outputPath: options.output,
+        quality: options.quality,
+        keepOriginal: options.keepOriginal
       });
     });
   })
