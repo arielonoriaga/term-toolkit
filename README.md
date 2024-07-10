@@ -1,4 +1,4 @@
-# Terminal Kit - TermKit for the friends
+# Terminal Tool Kit - TermKit for the friends
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -15,20 +15,13 @@ npm install -g termkit
 Ensure you have [Bun.js](https://bun.sh/docs/installation) installed in your environment before running the tool.
 
 ```sh
-bun add --global termkit
+bun install --global termkit
 ```
-
-or
-
-```sh
-bun add --global git@github.com:arielonoriaga/termkit.git
-```
-for more information, visit the [Bun.js add git](https://bun.sh/guides/install/add-git) website.
 
 #### General Usage
 
 ```sh
-termkit <command> [options]
+term-toolkit <command> [options]
 ```
 
 ##### Commands
