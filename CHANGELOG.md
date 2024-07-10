@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.4...v0.0.5) (2024-07-10)
+
+
+### Features
+
+* **git:** add cloner ([65d34e4](https://github.com/mokkapps/changelog-generator-demo/commits/65d34e49acdcf440341c1f8c6379aec98bc49cb3))
+
 ### [0.0.4](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.2...v0.0.4) (2024-07-10)
 
 ### [0.0.3](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.2...v0.0.3) (2024-07-10)
