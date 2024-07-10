@@ -46,5 +46,5 @@ export const deleter = async (directory: string, even: boolean): Promise<void> =
     directory = join(process.cwd(), directory);
   }
 
-  _deleter(directory);
+  _deleter(directory, even);
 }
