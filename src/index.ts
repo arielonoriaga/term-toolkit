@@ -1,17 +1,49 @@
 #!/usr/bin/env bun
 
 import { program } from 'commander';
+import {getPackageJson} from './scripts/utils/getPackageInfo';
+
+const packageJsonFile = getPackageJson()
 
 program
-  .version('1.0.0')
-  .description('My Custom CLI Tool')
-  .option('-n, --name <type>', 'specify your name')
-  .command('greet')
-  .description('Greet the user')
-  .action((options) => {
-    console.log('options', options)
-    const name = program.opts().name || 'friend';
-    console.log(`Hello, ${name}!`);
-  });
+  .version(packageJsonFile.version)
+  .description('CLI Tools made in bun.js for common usage')
+
+program
+  .command('deleter')
+  .description('Delete files by n index, even or odd')
+  .argument('<directory>', 'Directory path')
+  .option('-e, --even', 'Delete even indexes', 'odd')
+  .action((directory, options) => {
+    import('./scripts/deleter').then(({ deleter }) => {
+      deleter(directory, options.even);
+    });
+  })
+
+program
+  .command('rename')
+  .description('Rename files by index, for example: file01.txt, file02.txt, ..., file10.txt')
+  .argument('<directory>', 'Directory path')
+  .argument('<newName>', 'New name for the files')
+  .action((directory, newName) => {
+    import('./scripts/rename-sequence').then(({ renameFiles }) => {
+      renameFiles(directory, newName);
+    });
+  })
+
+program
+  .command('optimize')
+  .description('Optimize images in a directory')
+  .argument('<directory>', 'Directory path')
+  .option('-q, --quality <quality>', 'Quality of the image', '80')
+  .option('-o, --output <output>', 'Output directory')
+  .action((directory, options) => {
+    import('./scripts/optimizer').then(({ optimize }) => {
+      optimize({
+        inputPath: directory,
+        ...options
+      });
+    });
+  })
 
 program.parse(process.argv);

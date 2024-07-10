@@ -2,7 +2,7 @@ import { readdir, rename } from "fs/promises";
 import { join, extname, isAbsolute } from "path";
 import { homedir } from "os";
 
-async function renameFiles(directory: string, baseName: string): Promise<void> {
+const _renameFiles = async  (directory: string, baseName: string): Promise<void> => {
   try {
     const files: string[] = await readdir(directory);
     const sortedFiles = files.sort();
@@ -30,21 +30,24 @@ async function renameFiles(directory: string, baseName: string): Promise<void> {
   }
 }
 
-const args: string[] = process.argv.slice(2);
-if (args.length < 2) {
-  console.error("Please provide a directory path and a base name for the files as arguments.");
-  process.exit(1);
+export const renameFiles = async (directory: string, baseName: string): Promise<void> => {
+  if (!directory) {
+    console.error("Please provide a directory path.");
+    process.exit(1);
+  }
+
+  if (!baseName) {
+    console.error("Please provide a base name.");
+    process.exit(1);
+  }
+
+  if (directory.startsWith('~')) {
+    directory = join(homedir(), directory.slice(1));
+  }
+
+  if (!isAbsolute(directory)) {
+    directory = join(process.cwd(), directory);
+  }
+
+  renameFiles(directory, baseName);
 }
-
-let directoryPath: string = args[0];
-
-if (directoryPath.startsWith('~')) {
-  directoryPath = join(homedir(), directoryPath.slice(1));
-}
-
-if (!isAbsolute(directoryPath)) {
-  directoryPath = join(process.cwd(), directoryPath);
-}
-
-const baseName: string = args[1];
-renameFiles(directoryPath, baseName);
