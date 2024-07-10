@@ -44,7 +44,7 @@ program
       optimize({
         inputPath: directory,
         outputPath: options.output,
-        quality: options.quality,
+        formatOptions: { quality: options.quality },
         keepOriginal: options.keepOriginal,
       })
     })
