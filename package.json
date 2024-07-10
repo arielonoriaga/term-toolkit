@@ -7,7 +7,7 @@
   "version": "0.3.0",
   "type": "module",
   "bin": {
-    "term-toolkit": "dist/term-toolkit"
+    "term-toolkit": "./dist/term-toolkit.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.3.0",
@@ -21,7 +21,7 @@
     "typescript-eslint": "^7.16.0"
   },
   "scripts": {
-    "prepublishOnly": "rm -rf ./dist && bun run build",
+    "postinstall": "npm run build && chmod +x dist/term-toolkit",
     "publish:minor": "bun run release:minor && git push --follow-tags && npm publish",
     "publish:patch": "bun run release:patch && git push --follow-tags && npm publish",
     "build": "bun build ./src/index.ts --minify --sourcemap --compile --outfile=./dist/term-toolkit",
@@ -50,6 +50,11 @@
     "image",
     "image-compressor"
   ],
+  "engines": {
+    "node": ">= 16",
+    "npm": ">= 5.6.0",
+    "yarn": ">= 1.6.0"
+  },
   "bugs": {
     "url": "https://github.com/arielonoriaga/term-toolkit/issues"
   },
