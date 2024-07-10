@@ -6,9 +6,8 @@
   "description": "A CLI tool that offers several commands to help you with your daily tasks.",
   "version": "0.0.5",
   "type": "module",
-  "main": "dist/termkit",
   "bin": {
-    "termkit": "./dist/termkit"
+    "termkit": "dist/termkit"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -31,5 +30,21 @@
     "commander": "^12.1.0",
     "sharp": "^0.33.4",
     "typescript": "^5.5.3"
-  }
+  },
+  "main": "dist/termkit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arielonoriaga/termkit.git"
+  },
+  "keywords": [
+    "git",
+    "cli",
+    "cli-tool",
+    "image",
+    "image-compressor"
+  ],
+  "bugs": {
+    "url": "https://github.com/arielonoriaga/termkit/issues"
+  },
+  "homepage": "https://github.com/arielonoriaga/termkit#readme"
 }
