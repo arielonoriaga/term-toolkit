@@ -4,10 +4,10 @@
   "author": "Ariel Onoriaga",
   "license": "MIT",
   "description": "A CLI tool that offers several commands to help you with your daily tasks.",
-  "version": "0.2.6",
+  "version": "0.2.5",
   "type": "module",
   "bin": {
-    "term-toolkit": "dist/term-toolkit.js"
+    "term-toolkit": "dist/term-toolkit"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.3.0",
@@ -21,10 +21,10 @@
     "typescript-eslint": "^7.16.0"
   },
   "scripts": {
-    "postinstall": "npm run build && chmod +x dist/term-toolkit.js",
+    "prepublishOnly": "rm -rf ./dist && bun run build",
     "publish:minor": "bun run release:minor && git push --follow-tags && npm publish",
     "publish:patch": "bun run release:patch && git push --follow-tags && npm publish",
-    "build": "bun build ./src/index.ts --minify --sourcemap --compile --outfile=./dist/term-toolkit.js",
+    "build": "bun build ./src/index.ts --minify --sourcemap --compile --outfile=./dist/term-toolkit",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
