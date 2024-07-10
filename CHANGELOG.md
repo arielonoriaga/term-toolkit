@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.6](https://github.com/mokkapps/changelog-generator-demo/compare/v0.3.5...v0.3.6) (2024-07-10)
+
+
+* change reference to bin file in package json ([c22a366](https://github.com/mokkapps/changelog-generator-demo/commits/c22a366d9a0ddf54c5c4d9fe717a64ba7a98b6f0))
+
 ### [0.3.5](https://github.com/mokkapps/changelog-generator-demo/compare/v0.3.4...v0.3.5) (2024-07-10)
 
 
