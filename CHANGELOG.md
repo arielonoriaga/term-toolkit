@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/mokkapps/changelog-generator-demo/compare/v0.1.0...v0.1.1) (2024-07-10)
+
+
+### Bug Fixes
+
+* **renamer:** take directory from current path or option ([5ca1fe7](https://github.com/mokkapps/changelog-generator-demo/commits/5ca1fe7cb30a9c6e5953ae733079a22f6f4410fb))
+
 ## [0.1.0](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.6...v0.1.0) (2024-07-10)
 
 ### [0.0.6](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.5...v0.0.6) (2024-07-10)
