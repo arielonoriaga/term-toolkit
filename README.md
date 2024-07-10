@@ -9,13 +9,13 @@ A CLI tool that offers several commands to help you with your daily tasks. The t
 To install the CLI tool, use the `(npm|pnpm|yarn|bun)` package manager:
 
 ```sh
-npm install -g termkit
+npm install -g term-toolkit
 ```
 
 Ensure you have [Bun.js](https://bun.sh/docs/installation) installed in your environment before running the tool.
 
 ```sh
-bun install --global termkit
+bun install --global term-toolkit
 ```
 
 #### General Usage
@@ -24,33 +24,89 @@ bun install --global termkit
 term-toolkit <command> [options]
 ```
 
-##### Commands
- - deleter: Delete files by specified index criteria (either even or odd).
- - renamer: Rename files by specified index criteria (either even or odd).
- - optimizer: Optimize files by specified index criteria (either even or odd).
- - clone-repo: Clone a repository from a specified URL.
+```sh
+Usage: term-toolkit [options] [command]
+
+CLI Tools made in bun.js for common usage
+
+Options:
+  -V, --version                   output the version number
+  -h, --help                      display help for command
+
+Commands:
+  deleter [options] <directory>   Delete files by n index, even or odd
+  rename [options] <newName>      Rename files by index, for example: file01.txt, file02.txt, ..., file10.txt
+  optimize [options] <directory>  Optimize images in a directory
+  clone-repo [options] <repoUrl>  Clone a repository and optionally reset its history
+  help [command]                  display help for command
+```
 
 Deleter
 ---
-Delete files by specified index criteria (either even or odd).
 ```sh
-termkit deleter [options]
-```
+term-toolkit deleter -h
+Usage: term-toolkit deleter [options] <directory>
+
+Delete files by n index, even or odd
+
 Arguments:
+  directory   Directory path
 
-<directory>: Directory path where files will be deleted.
 Options:
-
--e, --even: Delete files with even indexes. If not specified, odd indexes will be used.
-
-Renamer
----
-Rename files by specified index criteria (either even or odd).
-```sh
-termkit renamer [options]
+  -e, --even  Delete even indexes
+  -h, --help  display help for command
 ```
-Rename files in a sequence, for example: file01.txt, file02.txt, ..., file10.txt.
 
+Rename
+---
+```sh
+term-toolkit rename -h
+Usage: term-toolkit rename [options] <newName>
+
+Rename files by index, for example: file01.txt, file02.txt, ..., file10.txt
+
+Arguments:
+  newName                      New name for the files
+
+Options:
+  -d, --directory <directory>  Directory path (default: ".")
+  -h, --help                   display help for command
+```
+
+Optimize
+---
+```
+term-toolkit optimize -h
+Usage: term-toolkit optimize [options] <directory>
+
+Optimize images in a directory
+
+Arguments:
+  directory                Directory path with images or image
+
+Options:
+  -q, --quality <quality>  Quality of the image (default: "80")
+  -o, --output <output>    Output directory
+  --keep-original          Keep the original image (default: true)
+  -h, --help               display help for command
+```
+
+Clone Repo
+---
+```sh
+term-toolkit clone-repo -h
+Usage: term-toolkit clone-repo [options] <repoUrl>
+
+Clone a repository and optionally reset its history
+
+Arguments:
+  repoUrl                Repository URL
+
+Options:
+  --no-reset             Do not reset the history
+  -o, --output <output>  Output folder
+  -h, --help             display help for command
+```
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
