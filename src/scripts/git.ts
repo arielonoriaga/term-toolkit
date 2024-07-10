@@ -14,22 +14,14 @@ const _cloneRepo = ({ repoUrl, resetHistory = true, outputFolder }: Args) => {
     const targetFolder = outputFolder || repoName
 
     execSync(`git clone ${repoUrl} ${targetFolder}`, { stdio: 'inherit' })
-    console.log(`Repository cloned to ./${targetFolder}`)
 
     if (!resetHistory) return
     process.chdir(`./${targetFolder}`)
 
     execSync('rm -rf .git', { stdio: 'inherit' })
-    console.log('Removed .git directory')
-
     execSync('git init', { stdio: 'inherit' })
-    console.log('Initialized new git repository')
-
     execSync('git add .', { stdio: 'inherit' })
-    console.log('Added all files to the new git repository')
-
     execSync('git commit -m "Initial commit"', { stdio: 'inherit' })
-    console.log('Committed the changes')
   } catch (error) {
     console.error(error)
   }
