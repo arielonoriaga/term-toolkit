@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.6...v0.3.0) (2024-07-10)
+
+
+* re-add binary file to build ([ae4dffa](https://github.com/mokkapps/changelog-generator-demo/commits/ae4dffa0cfb434ae9e96aa3239d02ac85e643abb))
+* **release:** 0.2.6 ([12a40fa](https://github.com/mokkapps/changelog-generator-demo/commits/12a40fa54b4bbde7426af9483674b17a38db692a))
+
 ### [0.2.6](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.5...v0.2.6) (2024-07-10)
 
 
