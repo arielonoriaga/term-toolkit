@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
-import { program } from 'commander';
-import {getPackageJson} from './scripts/utils/getPackageInfo';
+import { program } from 'commander'
+import { getPackageJson } from './scripts/utils/getPackageInfo'
 
 const packageJsonFile = getPackageJson()
 
@@ -17,8 +17,8 @@ program
   .option('-e, --even', 'Delete even indexes', 'odd')
   .action((directory, options) => {
     import('./scripts/deleter').then(({ deleter }) => {
-      deleter(directory, options.even);
-    });
+      deleter(directory, options.even)
+    })
   })
 
 program
@@ -28,8 +28,8 @@ program
   .option('-d, --directory <directory>', 'Directory path', '.')
   .action((newName, options) => {
     import('./scripts/rename-sequence').then(({ renameFiles }) => {
-      renameFiles(options.directory, newName);
-    });
+      renameFiles(options.directory, newName)
+    })
   })
 
 program
@@ -45,9 +45,9 @@ program
         inputPath: directory,
         outputPath: options.output,
         quality: options.quality,
-        keepOriginal: options.keepOriginal
-      });
-    });
+        keepOriginal: options.keepOriginal,
+      })
+    })
   })
 
 program
@@ -61,9 +61,9 @@ program
       cloneRepo({
         repoUrl,
         resetHistory: options.reset,
-        outputFolder: options.output
-      });
-    });
+        outputFolder: options.output,
+      })
+    })
   })
 
-program.parse(process.argv);
+program.parse(process.argv)
