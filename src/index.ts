@@ -24,8 +24,8 @@ program
 program
   .command('rename')
   .description('Rename files by index, for example: file01.txt, file02.txt, ..., file10.txt')
-  .argument('<directory>', 'Directory path')
   .argument('<newName>', 'New name for the files')
+  .option('-d, --directory <directory>', 'Directory path', '.')
   .action((directory, newName) => {
     import('./scripts/rename-sequence').then(({ renameFiles }) => {
       renameFiles(directory, newName);
@@ -35,7 +35,7 @@ program
 program
   .command('optimize')
   .description('Optimize images in a directory')
-  .argument('<directory>', 'Directory path')
+  .argument('<directory>', 'Directory path with images or image')
   .option('-q, --quality <quality>', 'Quality of the image', '80')
   .option('-o, --output <output>', 'Output directory')
   .option('--keep-original', 'Keep the original image', true)
