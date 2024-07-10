@@ -4,14 +4,15 @@
   "version": "0.0.1",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^20.14.10",
+    "@types/commander": "^2.12.2",
+    "standard-version": "^9.5.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@types/commander": "^2.12.2",
-    "@types/node": "^20.14.10",
     "commander": "^12.1.0",
     "sharp": "^0.33.4",
     "typescript": "^5.5.3"

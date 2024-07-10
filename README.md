@@ -26,8 +26,8 @@ your-cli-tool <command> [options]
  - optimizer: Optimize files by specified index criteria (either even or odd).
 
 Deleter
-Delete files by specified index criteria (either even or odd).
 ---
+Delete files by specified index criteria (either even or odd).
 ```sh
 your-cli-tool deleter [options]
 ```
