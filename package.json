@@ -17,6 +17,7 @@
   },
   "scripts": {
     "prepublishOnly": "rm -rf ./dist && bun run build",
+    "publish:minor": "bun run release:minor && git push --follow-tags && npm publish",
     "build": "bun build ./src/index.ts --minify --compile --outfile=./dist/term-toolkit",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
