@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.3...v0.2.4) (2024-07-10)
+
+
+### Bug Fixes
+
+* **bin:** add x permission to bin file ([d729297](https://github.com/mokkapps/changelog-generator-demo/commits/d7292974593ba38e4e829cc258dceafe04dd0513))
+
 ### [0.2.3](https://github.com/mokkapps/changelog-generator-demo/compare/v0.2.2...v0.2.3) (2024-07-10)
 
 
