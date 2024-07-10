@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.5...v0.0.6) (2024-07-10)
+
+
+### Bug Fixes
+
+* replace termkit to term-toolkit ([8fe7a45](https://github.com/mokkapps/changelog-generator-demo/commits/8fe7a45c4cf8858e3ebeb4b078e60d94edffbbae))
+
 ### [0.0.5](https://github.com/mokkapps/changelog-generator-demo/compare/v0.0.4...v0.0.5) (2024-07-10)
 
 
