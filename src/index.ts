@@ -7,6 +7,7 @@ const packageJsonFile = getPackageJson()
 
 program
   .version(packageJsonFile.version)
+  .name('term-toolkit')
   .description('CLI Tools made in bun.js for common usage')
 
 program

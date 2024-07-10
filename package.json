@@ -1,5 +1,5 @@
 {
-  "name": "termkit",
+  "name": "term-toolkit",
   "module": "src/index.ts",
   "author": "Ariel Onoriaga",
   "license": "MIT",
@@ -7,7 +7,7 @@
   "version": "0.0.5",
   "type": "module",
   "bin": {
-    "termkit": "dist/termkit"
+    "term-toolkit": "dist/term-toolkit"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,8 +16,8 @@
     "standard-version": "^9.5.0"
   },
   "scripts": {
-    "prepublishOnly": "bun run build",
-    "build": "bun build ./src/index.ts --minify --compile --outfile=./dist/termkit",
+    "prepublishOnly": "rm -rf ./dist && bun run build",
+    "build": "bun build ./src/index.ts --minify --compile --outfile=./dist/term-toolkit",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
@@ -31,20 +31,22 @@
     "sharp": "^0.33.4",
     "typescript": "^5.5.3"
   },
-  "main": "dist/termkit",
+  "main": "dist/term-toolkit",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arielonoriaga/termkit.git"
+    "url": "git+https://github.com/arielonoriaga/term-toolkit.git"
   },
   "keywords": [
     "git",
+    "terminal",
+    "toolkit",
     "cli",
     "cli-tool",
     "image",
     "image-compressor"
   ],
   "bugs": {
-    "url": "https://github.com/arielonoriaga/termkit/issues"
+    "url": "https://github.com/arielonoriaga/term-toolkit/issues"
   },
-  "homepage": "https://github.com/arielonoriaga/termkit#readme"
+  "homepage": "https://github.com/arielonoriaga/term-toolkit#readme"
 }
