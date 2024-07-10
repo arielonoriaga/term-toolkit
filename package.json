@@ -1,13 +1,19 @@
 {
   "name": "cli-tools",
   "module": "index.ts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^20.14.10",
     "@types/commander": "^2.12.2",
     "standard-version": "^9.5.0"
+  },
+  "scripts": {
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
