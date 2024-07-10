@@ -14,7 +14,6 @@
     "@stylistic/eslint-plugin": "^2.3.0",
     "@types/bun": "latest",
     "@types/commander": "^2.12.2",
-    "@types/eslint__js": "^8.42.3",
     "@types/node": "^20.14.10",
     "eslint": "^9.6.0",
     "standard-version": "^9.5.0",

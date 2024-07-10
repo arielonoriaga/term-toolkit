@@ -1,24 +1,11 @@
 import { readdir, readFile, writeFile, stat } from 'fs/promises'
 import { extname, join, dirname } from 'path'
-import sharp, {AvifOptions, GifOptions, HeifOptions, Jp2Options, JpegOptions, JxlOptions, PngOptions, RawOptions, TiffOptions, WebpOptions} from 'sharp'
+import sharp, { AvifOptions, GifOptions, HeifOptions, Jp2Options, JpegOptions, JxlOptions, PngOptions, RawOptions, TiffOptions, WebpOptions } from 'sharp'
 import { ensureDirectoryExists } from './utils/files'
-
-type SuportedTypes = JpegOptions | PngOptions | JxlOptions | Jp2Options | WebpOptions | GifOptions | AvifOptions | HeifOptions | TiffOptions | RawOptions | { quality?: number }
-type FileBuffer = Buffer | ArrayBuffer | Uint8Array | Uint8ClampedArray | Int8Array | Uint16Array | Int16Array | Uint32Array | Int32Array | Float32Array | Float64Array | string
-
-type CLIArgs = {
-  outputPath?: string
-  inputPath: string
-  formatOptions?: SuportedTypes
-  keepOriginal?: boolean
-}
-
-type OptimizePngArgs = Omit<CLIArgs, 'quality' | 'keepOriginal'>
+import { CLIArgs, FileBuffer, OptimizePngArgs, SupportedExtensions } from './domain/images'
 
 let quality: number
 let keepOriginal: boolean
-
-type SupportedExtensions = 'jpeg' | 'png' | 'jxl' | 'jp2' | 'webp' | 'gif' | 'avif' | 'heif' | 'tiff' | 'raw'
 
 const isSupportedExtension = (extension: string): extension is SupportedExtensions => {
   return ['jpeg', 'png', 'jxl', 'jp2', 'webp', 'gif', 'avif', 'heif', 'tiff', 'raw'].includes(extension)
@@ -96,7 +83,7 @@ export const optimize = async (args: CLIArgs): Promise<void> => {
     process.exit(1)
   }
 
-  // @ts-ignore
+  // @ts-expect-error quality is a number
   quality = +(args.formatOptions?.quality || 80)
   if(quality < 1 || quality > 100) {
     console.error('Quality must be a number between 1 and 100.')
