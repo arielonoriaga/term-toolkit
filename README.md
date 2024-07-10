@@ -1,42 +1,47 @@
-# CLI Tool Built with Bun.js
+# Terminal Kit - TermKit for the friends
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Description
-The CLI tool offers several commands, each with its own description and options. The commands include:
-- deleter: Delete files by specified index criteria (either even or odd).
-- renamer: Rename files by specified index criteria (either even or odd).
-- optimizer: Optimize files by specified index criteria (either even or odd).
+A CLI tool that offers several commands to help you with your daily tasks. The tool is built using Bun.js.
 
 ## Installation
-To install the CLI tool, use the npm package manager:
+To install the CLI tool, use the `(npm|pnpm|yarn|bun)` package manager:
 
 ```sh
-npm install -g your-cli-tool
+npm install -g termkit
 ```
 
-Ensure you have Bun.js installed in your environment before running the tool.
+Ensure you have [Bun.js](https://bun.sh/docs/installation) installed in your environment before running the tool.
 
-### Usage
-The CLI tool offers several commands, each with its own description and options.
+```sh
+bun add --global termkit
+```
 
+or
+
+```sh
+bun add --global git@github.com:arielonoriaga/termkit.git
+```
+for more information, visit the [Bun.js add git](https://bun.sh/guides/install/add-git) website.
 
 #### General Usage
 
 ```sh
-your-cli-tool <command> [options]
+termkit <command> [options]
 ```
 
 ##### Commands
  - deleter: Delete files by specified index criteria (either even or odd).
  - renamer: Rename files by specified index criteria (either even or odd).
  - optimizer: Optimize files by specified index criteria (either even or odd).
+ - clone-repo: Clone a repository from a specified URL.
 
 Deleter
 ---
 Delete files by specified index criteria (either even or odd).
 ```sh
-your-cli-tool deleter [options]
+termkit deleter [options]
 ```
 Arguments:
 
@@ -49,7 +54,7 @@ Renamer
 ---
 Rename files by specified index criteria (either even or odd).
 ```sh
-your-cli-tool renamer [options]
+termkit renamer [options]
 ```
 Rename files in a sequence, for example: file01.txt, file02.txt, ..., file10.txt.
 

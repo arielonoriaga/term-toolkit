@@ -49,4 +49,20 @@ program
     });
   })
 
+program
+  .command('clone-repo')
+  .description('Clone a repository and optionally reset its history')
+  .argument('<repoUrl>', 'Repository URL')
+  .option('--no-reset', 'Do not reset the history')
+  .option('-o, --output <output>', 'Output folder')
+  .action((repoUrl, options) => {
+    import('./scripts/git').then(({ cloneRepo }) => {
+      cloneRepo({
+        repoUrl,
+        resetHistory: options.reset,
+        outputFolder: options.output
+      });
+    });
+  })
+
 program.parse(process.argv);
