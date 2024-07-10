@@ -1,6 +1,6 @@
 # Terminal Tool Kit - TermKit for the friends
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![npm version](https://badge.fury.io/js/term-toolkit.svg)](https://badge.fury.io/js/term-toolkit) [![npm](https://img.shields.io/npm/dt/term-toolkit)](https://www.npmjs.com/package/term-toolkit)
+[![npm version](https://badge.fury.io/js/term-toolkit.svg)](https://badge.fury.io/js/term-toolkit) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![npm](https://img.shields.io/npm/dt/term-toolkit)](https://www.npmjs.com/package/term-toolkit)
 
 ## Description
 A CLI tool that offers several commands to help you with your daily tasks. The tool is built using Bun.js.

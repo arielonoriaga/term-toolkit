@@ -11,9 +11,10 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^20.14.10",
     "@types/commander": "^2.12.2",
-    "standard-version": "^9.5.0"
+    "@types/node": "^20.14.10",
+    "standard-version": "^9.5.0",
+    "typescript": "^5.5.3"
   },
   "scripts": {
     "prepublishOnly": "rm -rf ./dist && bun run build",
@@ -25,13 +26,9 @@
     "release:patch": "standard-version --release-as patch",
     "release:major": "standard-version --release-as major"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
   "dependencies": {
     "commander": "^12.1.0",
-    "sharp": "^0.33.4",
-    "typescript": "^5.5.3"
+    "sharp": "^0.33.4"
   },
   "main": "dist/term-toolkit",
   "repository": {
