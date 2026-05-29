@@ -1,0 +1,13 @@
+[package]
+name = "ttk-sign"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+md5 = "0.7"
+sha1 = "0.10"
+walkdir = "2"
+ttk-core = { path = "../core" }
+
+[dev-dependencies]
+tempfile = "3"

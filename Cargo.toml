@@ -7,5 +7,10 @@ members = [
     "crates/optimize",
     "crates/clone-repo",
     "crates/git-digest",
+    "crates/sign",
+    "crates/copy-clean",
+    "crates/build-and-sign",
+    "crates/mp3-compress",
+    "crates/mp4-optimize",
 ]
 resolver = "2"
