@@ -4,42 +4,35 @@ use std::process::Command;
 pub struct Mp3CompressArgs<'a> {
     pub input: &'a Path,
     pub output_dir: Option<&'a Path>,
+    pub stereo: bool,
 }
 
 pub fn run(args: Mp3CompressArgs) -> Result<(), String> {
-    check_ffmpeg()?;
+    ttk_core::check_ffmpeg()?;
 
     if !args.input.exists() {
         return Err(format!("not found: {}", args.input.display()));
     }
 
     if args.input.is_file() {
-        run_file_mode(args.input, args.output_dir)
+        run_file_mode(args.input, args.output_dir, args.stereo)
     } else {
-        run_dir_mode(args.input, args.output_dir)
+        run_dir_mode(args.input, args.output_dir, args.stereo)
     }
 }
 
-fn check_ffmpeg() -> Result<(), String> {
-    Command::new("ffmpeg")
-        .arg("-version")
-        .output()
-        .map(|_| ())
-        .map_err(|_| "ffmpeg not found — install it first".to_string())
-}
-
-fn run_file_mode(input: &Path, output_dir: Option<&Path>) -> Result<(), String> {
+fn run_file_mode(input: &Path, output_dir: Option<&Path>, stereo: bool) -> Result<(), String> {
     if !is_mp3(input) {
-        return Err(format!("no MP3 files found in {}", input.display()));
+        return Err(format!("not an MP3 file: {}", input.display()));
     }
     let out_dir = output_dir
         .map(|p| p.to_path_buf())
         .or_else(|| input.parent().map(|p| p.to_path_buf()))
         .unwrap_or_else(|| PathBuf::from("."));
-    convert_file(input, &out_dir)
+    convert_file(input, &out_dir, stereo)
 }
 
-fn run_dir_mode(dir: &Path, output_dir: Option<&Path>) -> Result<(), String> {
+fn run_dir_mode(dir: &Path, output_dir: Option<&Path>, stereo: bool) -> Result<(), String> {
     let mp3s: Vec<PathBuf> = std::fs::read_dir(dir)
         .map_err(|e| format!("read dir {}: {}", dir.display(), e))?
         .filter_map(|e| e.ok())
@@ -55,31 +48,40 @@ fn run_dir_mode(dir: &Path, output_dir: Option<&Path>) -> Result<(), String> {
         .map(|p| p.to_path_buf())
         .unwrap_or_else(|| dir.to_path_buf());
 
-    let mut converted = 0usize;
+    let total = mp3s.len();
+    let mut succeeded = 0usize;
+
     for mp3 in &mp3s {
-        match convert_file(mp3, &out_dir) {
-            Ok(()) => converted += 1,
+        match convert_file(mp3, &out_dir, stereo) {
+            Ok(()) => succeeded += 1,
             Err(e) => eprintln!("warn: {}", e),
         }
     }
 
-    println!("converted {}/{} files", converted, mp3s.len());
+    println!("converted {}/{} files", succeeded, total);
+
+    if succeeded == 0 && total > 0 {
+        return Err(format!("all {} file(s) failed to convert", total));
+    }
+
     Ok(())
 }
 
-fn convert_file(input: &Path, out_dir: &Path) -> Result<(), String> {
+fn convert_file(input: &Path, out_dir: &Path, stereo: bool) -> Result<(), String> {
     let stem = input
         .file_stem()
         .ok_or_else(|| format!("no file stem: {}", input.display()))?
         .to_string_lossy();
     let out = out_dir.join(format!("{}.m4a", stem));
 
+    let channels = if stereo { "2" } else { "1" };
+
     let status = Command::new("ffmpeg")
         .args([
             "-i",
             &input.display().to_string(),
             "-ac",
-            "1",
+            channels,
             "-c:a",
             "aac",
             "-b:a",
@@ -123,6 +125,7 @@ mod tests {
         let result = run(Mp3CompressArgs {
             input: &tmp.path().join("nope"),
             output_dir: None,
+            stereo: false,
         });
         match result {
             Err(e) if e.contains("ffmpeg not found") => {}
@@ -138,6 +141,7 @@ mod tests {
         let result = run(Mp3CompressArgs {
             input: tmp.path(),
             output_dir: None,
+            stereo: false,
         });
         match result {
             Err(e) if e.contains("ffmpeg not found") => {}
@@ -162,10 +166,11 @@ mod tests {
         let result = run(Mp3CompressArgs {
             input: &f,
             output_dir: None,
+            stereo: false,
         });
         match result {
             Err(e) if e.contains("ffmpeg not found") => {}
-            Err(e) => assert!(e.contains("no MP3"), "unexpected: {}", e),
+            Err(e) => assert!(e.contains("not an MP3 file"), "unexpected: {}", e),
             Ok(()) => panic!("expected error"),
         }
     }

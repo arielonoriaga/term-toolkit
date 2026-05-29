@@ -4,11 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-md5 = "0.7"
-sha1 = "0.10"
 walkdir = "2"
 zip = "2"
 ttk-core = { path = "../core" }
+ttk-sign = { path = "../sign" }
 
 [dev-dependencies]
 tempfile = "3"

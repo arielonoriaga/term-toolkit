@@ -64,6 +64,15 @@ impl Quality {
             Quality::Low => "96k",
         }
     }
+
+    fn level(self) -> &'static str {
+        match self {
+            Quality::High => "4.1",
+            Quality::Medium => "3.1",
+            Quality::Low => "3.0",
+            Quality::Web => "3.0",
+        }
+    }
 }
 
 pub struct Mp4OptimizeArgs<'a> {
@@ -73,7 +82,7 @@ pub struct Mp4OptimizeArgs<'a> {
 }
 
 pub fn run(args: Mp4OptimizeArgs) -> Result<(), String> {
-    check_ffmpeg()?;
+    ttk_core::check_ffmpeg()?;
 
     if !args.input.exists() {
         return Err(format!("not found: {}", args.input.display()));
@@ -84,14 +93,6 @@ pub fn run(args: Mp4OptimizeArgs) -> Result<(), String> {
     } else {
         run_dir_mode(args.input, args.output_dir, args.quality)
     }
-}
-
-fn check_ffmpeg() -> Result<(), String> {
-    Command::new("ffmpeg")
-        .arg("-version")
-        .output()
-        .map(|_| ())
-        .map_err(|_| "ffmpeg not found".to_string())
 }
 
 fn run_file_mode(input: &Path, output_dir: Option<&Path>, quality: Quality) -> Result<(), String> {
@@ -133,6 +134,11 @@ fn run_dir_mode(dir: &Path, output_dir: Option<&Path>, quality: Quality) -> Resu
     }
 
     println!("{}/{} files succeeded", succeeded, total);
+
+    if succeeded == 0 && total > 0 {
+        return Err(format!("all {} file(s) failed to convert", total));
+    }
+
     Ok(())
 }
 
@@ -150,7 +156,8 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
     let crf = quality.crf().to_string();
     let bitrate = quality.video_bitrate();
     let bufsize = {
-        let n: u32 = bitrate.trim_end_matches('k').parse().unwrap_or(0);
+        let n: u32 = bitrate.trim_end_matches('k').parse()
+            .expect("internal: video_bitrate must be Nk format");
         format!("{}k", n * 2)
     };
     let max_w = quality.max_w().to_string();
@@ -166,7 +173,7 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
             "-i", &input.display().to_string(),
             "-c:v", "libx264",
             "-profile:v", "baseline",
-            "-level:v", "3.0",
+            "-level:v", quality.level(),
             "-crf", &crf,
             "-maxrate", bitrate,
             "-bufsize", &bufsize,
@@ -251,6 +258,14 @@ mod tests {
         assert_eq!(Quality::Low.max_h(), 480);
         assert_eq!(Quality::Web.video_bitrate(), "1500k");
         assert_eq!(Quality::High.audio_bitrate(), "192k");
+    }
+
+    #[test]
+    fn test_quality_levels() {
+        assert_eq!(Quality::High.level(), "4.1");
+        assert_eq!(Quality::Medium.level(), "3.1");
+        assert_eq!(Quality::Low.level(), "3.0");
+        assert_eq!(Quality::Web.level(), "3.0");
     }
 
     #[test]

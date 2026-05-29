@@ -1,13 +1,9 @@
-use sha1::{Digest, Sha1};
 use std::fs;
 use std::io::Write;
 use std::path::Path;
-use ttk_core::fs_utils::copy_clean_dir;
+use ttk_core::fs_utils::{copy_clean_dir, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS};
 use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
-
-const SKIP_DIRS: &[&str] = &["node_modules", ".git", ".github", "dist"];
-const SKIP_EXTS: &[&str] = &["md5", "sha1", "zip"];
 
 pub struct BuildAndSignArgs<'a> {
     pub source: &'a Path,
@@ -26,7 +22,7 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
         return Err(format!("{} already exists", clean_dir));
     }
 
-    copy_clean_dir(args.source, clean_path, SKIP_DIRS, SKIP_EXTS)?;
+    copy_clean_dir(args.source, clean_path, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS)?;
 
     let result = sign_and_zip(clean_path, args.prefix);
 
@@ -38,41 +34,12 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
 }
 
 fn sign_and_zip(clean_path: &Path, prefix: &str) -> Result<(), String> {
-    let mut md5_lines: Vec<String> = Vec::new();
-    let mut sha1_lines: Vec<String> = Vec::new();
+    ttk_sign::sign_dir(clean_path, prefix)?;
 
-    for entry in WalkDir::new(clean_path).follow_links(false) {
-        let entry = entry.map_err(|e| format!("walk error: {}", e))?;
-        let path = entry.path();
-        if !path.is_file() {
-            continue;
-        }
-        let bytes = fs::read(path).map_err(|e| format!("read {}: {}", path.display(), e))?;
-
-        let md5_hash = format!("{:x}", md5::compute(&bytes));
-        let sha1_hash = {
-            let mut h = Sha1::new();
-            h.update(&bytes);
-            format!("{:x}", h.finalize())
-        };
-
-        let display = path.display().to_string();
-        md5_lines.push(format!("{}  {}", md5_hash, display));
-        sha1_lines.push(format!("{}  {}", sha1_hash, display));
-    }
-
-    let md5_path = format!("{}.md5", prefix);
-    let sha1_path = format!("{}.sha1", prefix);
     let zip_path = format!("{}.zip", prefix);
-
-    fs::write(&md5_path, md5_lines.join("\n") + "\n")
-        .map_err(|e| format!("write {}: {}", md5_path, e))?;
-    fs::write(&sha1_path, sha1_lines.join("\n") + "\n")
-        .map_err(|e| format!("write {}: {}", sha1_path, e))?;
-
     zip_dir(clean_path, &zip_path)?;
 
-    println!("created {}, {}, {}", zip_path, md5_path, sha1_path);
+    println!("created {}, {}.md5, {}.sha1", zip_path, prefix, prefix);
     Ok(())
 }
 

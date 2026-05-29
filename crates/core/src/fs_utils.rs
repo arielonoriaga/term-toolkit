@@ -2,6 +2,9 @@ use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
 
+pub const DEFAULT_SKIP_DIRS: &[&str] = &["node_modules", ".git", ".github", "dist"];
+pub const DEFAULT_SKIP_EXTS: &[&str] = &["md5", "sha1", "zip"];
+
 pub fn copy_clean_dir(src: &Path, dest: &Path, skip_dirs: &[&str], skip_exts: &[&str]) -> Result<(), String> {
     for entry in WalkDir::new(src).follow_links(false) {
         let entry = entry.map_err(|e| format!("walk error: {}", e))?;

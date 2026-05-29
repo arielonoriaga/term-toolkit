@@ -1,8 +1,5 @@
 use std::path::Path;
-use ttk_core::fs_utils::copy_clean_dir;
-
-const SKIP_DIRS: &[&str] = &["node_modules", ".git", ".github", "dist"];
-const SKIP_EXTS: &[&str] = &["md5", "sha1", "zip"];
+use ttk_core::fs_utils::{copy_clean_dir, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS};
 
 pub struct CopyCleanArgs<'a> {
     pub source: &'a Path,
@@ -17,7 +14,7 @@ pub fn run(args: CopyCleanArgs) -> Result<(), String> {
         return Err(format!("destination already exists: {}", args.dest.display()));
     }
 
-    copy_clean_dir(args.source, args.dest, SKIP_DIRS, SKIP_EXTS)?;
+    copy_clean_dir(args.source, args.dest, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS)?;
 
     println!("copied {} → {}", args.source.display(), args.dest.display());
     Ok(())

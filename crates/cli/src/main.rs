@@ -80,6 +80,8 @@ enum Commands {
         #[arg(default_value = ".")]
         input: PathBuf,
         output_dir: Option<PathBuf>,
+        #[arg(long)]
+        stereo: bool,
     },
     /// Optimize MP4 files via ffmpeg
     Mp4Optimize {
@@ -160,10 +162,11 @@ fn run_command(cli: Cli) -> Result<(), String> {
                 prefix: &prefix,
             })
         }
-        Commands::Mp3Compress { input, output_dir } => {
+        Commands::Mp3Compress { input, output_dir, stereo } => {
             ttk_mp3_compress::run(ttk_mp3_compress::Mp3CompressArgs {
                 input: &input,
                 output_dir: output_dir.as_deref(),
+                stereo,
             })
         }
         Commands::Mp4Optimize { input, output_dir, quality } => {

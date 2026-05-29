@@ -8,15 +8,20 @@ pub struct SignArgs<'a> {
     pub prefix: &'a str,
 }
 
-pub fn run(args: SignArgs) -> Result<(), String> {
-    if !args.folder.exists() {
-        return Err(format!("folder not found: {}", args.folder.display()));
-    }
-
+pub fn sign_dir(folder: &Path, prefix: &str) -> Result<(), String> {
     let mut md5_lines: Vec<String> = Vec::new();
     let mut sha1_lines: Vec<String> = Vec::new();
 
-    for entry in WalkDir::new(args.folder).follow_links(false) {
+    for entry in WalkDir::new(folder)
+        .follow_links(false)
+        .into_iter()
+        .filter(|e| {
+            e.as_ref().map(|e| {
+                let ext = e.path().extension().and_then(|x| x.to_str()).unwrap_or("");
+                ext != "md5" && ext != "sha1"
+            }).unwrap_or(true)
+        })
+    {
         let entry = entry.map_err(|e| format!("walk error: {}", e))?;
         let path = entry.path();
         if !path.is_file() {
@@ -37,8 +42,8 @@ pub fn run(args: SignArgs) -> Result<(), String> {
         sha1_lines.push(format!("{}  {}", sha1_hash, display));
     }
 
-    let md5_path = format!("{}.md5", args.prefix);
-    let sha1_path = format!("{}.sha1", args.prefix);
+    let md5_path = format!("{}.md5", prefix);
+    let sha1_path = format!("{}.sha1", prefix);
 
     fs::write(&md5_path, md5_lines.join("\n") + "\n")
         .map_err(|e| format!("write {}: {}", md5_path, e))?;
@@ -47,6 +52,13 @@ pub fn run(args: SignArgs) -> Result<(), String> {
 
     println!("wrote {} and {}", md5_path, sha1_path);
     Ok(())
+}
+
+pub fn run(args: SignArgs) -> Result<(), String> {
+    if !args.folder.exists() {
+        return Err(format!("folder not found: {}", args.folder.display()));
+    }
+    sign_dir(args.folder, args.prefix)
 }
 
 #[cfg(test)]
@@ -134,5 +146,27 @@ mod tests {
         let line = sha1_content.lines().next().unwrap();
         let hash = line.splitn(2, "  ").next().unwrap();
         assert_eq!(hash.len(), 40, "sha1 hash must be 40 hex chars");
+    }
+
+    #[test]
+    fn test_sign_skips_md5_sha1_files() {
+        let src = tempdir().unwrap();
+        let out = tempdir().unwrap();
+        let prefix = out.path().join("cs").to_string_lossy().into_owned();
+
+        write_file(&src.path().join("real.bin"), b"data");
+        write_file(&src.path().join("prev.md5"), b"old_hash");
+        write_file(&src.path().join("prev.sha1"), b"old_hash");
+
+        run(SignArgs {
+            folder: src.path(),
+            prefix: &prefix,
+        })
+        .unwrap();
+
+        let md5_content = fs::read_to_string(format!("{}.md5", prefix)).unwrap();
+        assert_eq!(md5_content.lines().count(), 1, "only real.bin should be hashed");
+        assert!(!md5_content.contains("prev.md5"));
+        assert!(!md5_content.contains("prev.sha1"));
     }
 }
