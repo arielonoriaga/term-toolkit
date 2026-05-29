@@ -54,10 +54,10 @@ fn optimize_file(
         }
         _ => {
             img.save_with_format(&dest, fmt).map_err(|e| e.to_string())?;
-            if output.is_none() && !keep_original {
-                if dest != input {
-                    fs::remove_file(input).map_err(|e| e.to_string())?;
-                }
+            // if output=Some && !keep_original → also overwrite original (matches TS and JPEG behavior)
+            if output.is_some() && !keep_original {
+                let data = fs::read(&dest).map_err(|e| e.to_string())?;
+                fs::write(input, data).map_err(|e| e.to_string())?;
             }
         }
     }
@@ -73,7 +73,8 @@ fn optimize_dir(
     keep_original: bool,
 ) -> Result<(), String> {
     let entries = fs::read_dir(input).map_err(|e| e.to_string())?;
-    for entry in entries.filter_map(|e| e.ok()) {
+    for entry in entries {
+        let entry = entry.map_err(|e| e.to_string())?;
         let path = entry.path();
         let out_path = output.map(|o| o.join(entry.file_name()));
         let meta = fs::metadata(&path).map_err(|e| e.to_string())?;
@@ -176,5 +177,31 @@ mod tests {
 
         assert!(out_dir.join("a.jpg").exists());
         assert!(out_dir.join("b.png").exists());
+    }
+
+    #[test]
+    fn test_optimize_non_jpeg_overwrites_original_when_output_and_no_keep() {
+        let dir = tempdir().unwrap();
+        let input = dir.path().join("test.png");
+        let output = dir.path().join("out.png");
+        tiny_png(&input);
+        let _original_bytes = std::fs::read(&input).unwrap();
+
+        run(OptimizeArgs {
+            input: &input,
+            output: Some(&output),
+            quality: 80,
+            keep_original: false,
+        })
+        .unwrap();
+
+        assert!(output.exists(), "output must exist");
+        assert!(input.exists(), "original must still exist");
+        // both input and output should contain identical valid image data
+        let out_bytes = std::fs::read(&output).unwrap();
+        let inp_bytes = std::fs::read(&input).unwrap();
+        assert_eq!(out_bytes, inp_bytes, "original must be overwritten with same data as output");
+        // verify still a valid image
+        ImageReader::open(&input).unwrap().decode().unwrap();
     }
 }
