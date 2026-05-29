@@ -1517,6 +1517,9 @@ dependencies = [
 [[package]]
 name = "ttk-clone-repo"
 version = "0.1.0"
+dependencies = [
+ "tempfile",
+]
 
 [[package]]
 name = "ttk-core"
