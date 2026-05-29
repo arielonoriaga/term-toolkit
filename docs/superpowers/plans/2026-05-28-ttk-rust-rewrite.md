@@ -335,7 +335,7 @@ mod tests {
 
     #[test]
     fn test_parse_commit_line_valid() {
-        let line = "abc1234|user@example.com|User Name|feat: add thing|2026-05-28T10:30:00";
+        let line = "abc1234\x00user@example.com\x00User Name\x00feat: add thing\x002026-05-28T10:30:00";
         let repo = PathBuf::from("/tmp/repo");
         let commit = parse_commit_line(line, &repo).unwrap();
 
@@ -347,8 +347,8 @@ mod tests {
 
     #[test]
     fn test_parse_commit_line_subject_with_pipe() {
-        // subject containing | should still parse (splitn(5, ..))
-        let line = "abc1234|user@example.com|User Name|fix: a|b edge case|2026-05-28T10:30:00";
+        // null-byte delimiter: pipe in subject no longer breaks parse
+        let line = "abc1234\x00user@example.com\x00User Name\x00fix: a|b edge case\x002026-05-28T10:30:00";
         let repo = PathBuf::from("/tmp/repo");
         let commit = parse_commit_line(line, &repo).unwrap();
 
@@ -357,7 +357,7 @@ mod tests {
 
     #[test]
     fn test_parse_commit_line_invalid() {
-        let line = "bad|line";
+        let line = "bad\x00line";
         let repo = PathBuf::from("/tmp/repo");
         assert!(parse_commit_line(line, &repo).is_none());
     }
@@ -428,7 +428,7 @@ pub fn git_log(
             "-C",
             repo.to_str().unwrap_or(""),
             "log",
-            "--format=%H|%ae|%an|%s|%ad",
+            "--format=%H%x00%ae%x00%an%x00%s%x00%ad",
             "--date=format:%Y-%m-%dT%H:%M:%S",
             &format!("--after={}", since.format("%Y-%m-%dT%H:%M:%S")),
             &format!("--before={}", until.format("%Y-%m-%dT%H:%M:%S")),
@@ -449,7 +449,7 @@ pub fn git_log(
 }
 
 fn parse_commit_line(line: &str, repo: &Path) -> Option<Commit> {
-    let parts: Vec<&str> = line.splitn(5, '|').collect();
+    let parts: Vec<&str> = line.splitn(5, '\0').collect();
     if parts.len() < 5 {
         return None;
     }
@@ -1010,6 +1010,9 @@ pub fn run(dir: &Path, base_name: &str) -> Result<(), String> {
             .unwrap_or_default();
         let new_name = format!("{}{:0>width$}{}", base_name, i, ext, width = pad_len);
         let new_path = dir.join(&new_name);
+        if new_path.exists() && new_path != *path {
+            return Err(format!("collision: {} already exists", new_path.display()));
+        }
         fs::rename(path, &new_path)
             .map_err(|e| format!("error renaming {}: {}", path.display(), e))?;
         println!("Renamed {} → {}", path.display(), new_path.display());
@@ -1211,12 +1214,12 @@ fn optimize_file(
             let mut buf = Vec::new();
             let mut enc = image::codecs::jpeg::JpegEncoder::new_with_quality(&mut buf, quality);
             enc.encode_image(&img).map_err(|e| e.to_string())?;
-            let write_path = if output.is_none() && keep_original {
-                input.to_path_buf()
-            } else {
-                dest
-            };
-            fs::write(&write_path, buf).map_err(|e| e.to_string())?;
+            // always write to dest (= output if Some, else input)
+            fs::write(&dest, &buf).map_err(|e| e.to_string())?;
+            // if output=Some && !keep_original → also overwrite original (matches TS behavior)
+            if output.is_some() && !keep_original {
+                fs::write(input, &buf).map_err(|e| e.to_string())?;
+            }
         }
         _ => {
             img.save_with_format(&dest, fmt).map_err(|e| e.to_string())?;
@@ -1690,7 +1693,8 @@ enum Commands {
         quality: u8,
         #[arg(short, long)]
         output: Option<PathBuf>,
-        #[arg(long, default_value_t = true)]
+        /// Keep original file (default: true). Use --keep-original=false to overwrite
+        #[arg(long, default_value_t = true, action = clap::ArgAction::Set)]
         keep_original: bool,
     },
     /// Clone a repo and optionally reset history
@@ -1698,8 +1702,8 @@ enum Commands {
         repo_url: String,
         #[arg(short, long)]
         output: Option<PathBuf>,
-        /// Reset git history after clone (default: true)
-        #[arg(long, default_value_t = true)]
+        /// Reset git history after clone (default: true). Use --reset=false to keep history
+        #[arg(long, default_value_t = true, action = clap::ArgAction::Set)]
         reset: bool,
     },
     /// Summarize commits across repos in a date range
@@ -1720,19 +1724,21 @@ enum Commands {
     },
 }
 
-fn parse_date(s: &str) -> DateTime<Local> {
+fn parse_date_at(s: &str, h: u32, m: u32, sec: u32) -> Result<DateTime<Local>, String> {
     NaiveDate::parse_from_str(s, "%Y-%m-%d")
-        .unwrap_or_else(|_| panic!("invalid date '{}', use YYYY-MM-DD", s))
-        .and_hms_opt(0, 0, 0)
+        .map_err(|_| format!("invalid date '{}', use YYYY-MM-DD", s))?
+        .and_hms_opt(h, m, sec)
         .unwrap()
         .and_local_timezone(Local)
         .single()
-        .expect("ambiguous local time")
+        .ok_or_else(|| format!("ambiguous local time for '{}'", s))
 }
 
-fn main() {
-    let cli = Cli::parse();
-    let result = match cli.command {
+fn parse_since_date(s: &str) -> Result<DateTime<Local>, String> { parse_date_at(s, 0, 0, 0) }
+fn parse_until_date(s: &str) -> Result<DateTime<Local>, String> { parse_date_at(s, 23, 59, 59) }
+
+fn run_command(cli: Cli) -> Result<(), String> {
+    match cli.command {
         Commands::Deleter { directory, even } => ttk_deleter::run(&directory, even),
         Commands::Rename { new_name, directory } => ttk_rename::run(&directory, &new_name),
         Commands::Optimize { directory, quality, output, keep_original } => {
@@ -1753,15 +1759,17 @@ fn main() {
         Commands::GitDigest { dir, since, until, last, output } => {
             ttk_git_digest::run(ttk_git_digest::GitDigestArgs {
                 dir,
-                since: since.as_deref().map(parse_date),
-                until: until.as_deref().map(parse_date),
+                since: since.as_deref().map(parse_since_date).transpose()?,
+                until: until.as_deref().map(parse_until_date).transpose()?,
                 last,
                 output,
             })
         }
-    };
+    }
+}
 
-    if let Err(e) = result {
+fn main() {
+    if let Err(e) = run_command(Cli::parse()) {
         eprintln!("error: {}", e);
         std::process::exit(1);
     }
