@@ -22,7 +22,11 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
         return Err(format!("{} already exists", clean_dir));
     }
 
-    copy_clean_dir(args.source, clean_path, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS)?;
+    let clean_display = clean_path.display().to_string();
+    if let Err(e) = copy_clean_dir(args.source, clean_path, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS) {
+        let _ = std::fs::remove_dir_all(clean_path);
+        return Err(format!("{e} (partial copy cleaned up at {clean_display})"));
+    }
 
     let result = sign_and_zip(clean_path, args.prefix);
 

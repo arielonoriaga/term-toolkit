@@ -82,6 +82,20 @@ impl Quality {
             Quality::Web => "baseline",
         }
     }
+
+    fn tune(self) -> Option<&'static str> {
+        match self {
+            Quality::High | Quality::Medium => Some("film"),
+            Quality::Low | Quality::Web => None,
+        }
+    }
+
+    fn fps_filter(self) -> Option<u32> {
+        match self {
+            Quality::High | Quality::Medium => None,
+            Quality::Low | Quality::Web => Some(30),
+        }
+    }
 }
 
 pub struct Mp4OptimizeArgs<'a> {
@@ -169,12 +183,18 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
             .map_err(|_| format!("internal: bad bitrate format: {}", bitrate))?;
         format!("{}k", n * 2)
     };
-    let max_w = quality.max_w().to_string();
-    let max_h = quality.max_h().to_string();
-    let vf = format!(
-        "scale='min({},iw)':'min({},ih)':force_original_aspect_ratio=decrease,fps=30",
-        max_w, max_h
-    );
+    let max_w = quality.max_w();
+    let max_h = quality.max_h();
+    let vf = match quality.fps_filter() {
+        Some(fps) => format!(
+            "scale='min({},iw)':'min({},ih)':force_original_aspect_ratio=decrease,fps={}",
+            max_w, max_h, fps
+        ),
+        None => format!(
+            "scale='min({},iw)':'min({},ih)':force_original_aspect_ratio=decrease",
+            max_w, max_h
+        ),
+    };
     let audio = quality.audio_bitrate();
 
     let input_str = input.to_str()
@@ -182,27 +202,30 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
     let out_str = out.to_str()
         .ok_or_else(|| format!("path contains non-UTF-8: {:?}", out))?;
 
-    let status = Command::new("ffmpeg")
-        .args([
-            "-i", input_str,
-            "-c:v", "libx264",
-            "-profile:v", quality.profile(),
-            "-level:v", quality.level(),
-            "-crf", &crf,
-            "-maxrate", bitrate,
-            "-bufsize", &bufsize,
-            "-vf", &vf,
-            "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            "-b:a", audio,
-            "-ac", "2",
-            "-ar", "44100",
-            "-movflags", "+faststart",
-            "-preset", "slow",
-            "-tune", "film",
-            "-y",
-            out_str,
-        ])
+    let mut cmd = Command::new("ffmpeg");
+    cmd.args([
+        "-i", input_str,
+        "-c:v", "libx264",
+        "-profile:v", quality.profile(),
+        "-level:v", quality.level(),
+        "-crf", &crf,
+        "-maxrate", bitrate,
+        "-bufsize", &bufsize,
+        "-vf", &vf,
+        "-pix_fmt", "yuv420p",
+        "-c:a", "aac",
+        "-b:a", audio,
+        "-ac", "2",
+        "-ar", "44100",
+        "-movflags", "+faststart",
+        "-preset", "slow",
+    ]);
+    if let Some(tune) = quality.tune() {
+        cmd.arg("-tune").arg(tune);
+    }
+    cmd.arg("-y").arg(out_str);
+
+    let status = cmd
         .status()
         .map_err(|e| format!("ffmpeg exec: {}", e))?;
 
