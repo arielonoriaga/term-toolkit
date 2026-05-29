@@ -22,17 +22,22 @@ impl MarkdownWriter {
             active_repos,
         );
 
-        let mut authors: Vec<&String> = groups.keys().collect();
-        authors.sort();
+        let mut author_entries: Vec<(String, &String)> = groups
+            .iter()
+            .map(|(email, repos)| {
+                let mut rp: Vec<&std::path::PathBuf> = repos.keys().collect();
+                rp.sort();
+                let name = rp.first()
+                    .and_then(|r| repos[*r].first())
+                    .map(|c| c.author_name.clone())
+                    .unwrap_or_else(|| email.clone());
+                (name, email)
+            })
+            .collect();
+        author_entries.sort_by(|a, b| a.0.cmp(&b.0));
 
-        for email in authors {
-            let repos = &groups[email];
-            let name = repos
-                .values()
-                .flat_map(|c| c.iter())
-                .next()
-                .map(|c| c.author_name.as_str())
-                .unwrap_or("unknown");
+        for (name, email) in &author_entries {
+            let repos = &groups[email.as_str()];
             md.push_str(&format!("\n## {}\n", name));
 
             let mut repo_paths: Vec<&std::path::PathBuf> = repos.keys().collect();
@@ -46,7 +51,7 @@ impl MarkdownWriter {
                     md.push_str(&format!(
                         "| `{}` | {} | {} |\n",
                         &c.hash[..7.min(c.hash.len())],
-                        c.subject,
+                        c.subject.replace('|', "\\|"),
                         c.date.format("%Y-%m-%d %H:%M"),
                     ));
                 }
@@ -114,6 +119,33 @@ mod tests {
         MarkdownWriter::write(&groups, &path, &since, &until, 1, 1).unwrap();
 
         assert!(path.exists());
+    }
+
+    #[test]
+    fn test_markdown_escapes_pipe_in_subject() {
+        let dir = tempdir().unwrap();
+        let path = dir.path().join("digest.md");
+        let repo = std::path::PathBuf::from("/tmp/repo");
+        let commit = Commit {
+            hash: "aaa1111".to_string(),
+            email: "u@u.com".to_string(),
+            author_name: "User".to_string(),
+            subject: "fix: handle a|b case".to_string(),
+            date: chrono::Local.with_ymd_and_hms(2026, 5, 28, 10, 0, 0).unwrap(),
+            repo: repo.clone(),
+        };
+        let mut repo_map = std::collections::HashMap::new();
+        repo_map.insert(repo, vec![commit]);
+        let mut groups = AuthorGroups::new();
+        groups.insert("u@u.com".to_string(), repo_map);
+        let since = chrono::Local.with_ymd_and_hms(2026, 5, 27, 0, 0, 0).unwrap();
+        let until = chrono::Local.with_ymd_and_hms(2026, 5, 28, 23, 59, 59).unwrap();
+
+        MarkdownWriter::write(&groups, &path, &since, &until, 1, 1).unwrap();
+
+        let content = std::fs::read_to_string(&path).unwrap();
+        assert!(content.contains("handle a\\|b case"), "pipe must be escaped in table");
+        assert!(!content.contains("handle a|b case"), "raw pipe must not appear in table cell");
     }
 
     #[test]

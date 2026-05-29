@@ -5,17 +5,22 @@ pub struct TermOutput;
 
 impl TermOutput {
     pub fn print_digest(groups: &AuthorGroups) {
-        let mut authors: Vec<&String> = groups.keys().collect();
-        authors.sort();
+        let mut author_entries: Vec<(String, &String)> = groups
+            .iter()
+            .map(|(email, repos)| {
+                let mut rp: Vec<&std::path::PathBuf> = repos.keys().collect();
+                rp.sort();
+                let name = rp.first()
+                    .and_then(|r| repos[*r].first())
+                    .map(|c| c.author_name.clone())
+                    .unwrap_or_else(|| email.clone());
+                (name, email)
+            })
+            .collect();
+        author_entries.sort_by(|a, b| a.0.cmp(&b.0));
 
-        for email in authors {
-            let repos = &groups[email];
-            let name = repos
-                .values()
-                .flat_map(|c| c.iter())
-                .next()
-                .map(|c| c.author_name.as_str())
-                .unwrap_or(email.as_str());
+        for (name, email) in &author_entries {
+            let repos = &groups[email.as_str()];
 
             println!("\n{}", format!("## {}", name).bold().green());
 
