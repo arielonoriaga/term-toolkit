@@ -76,17 +76,22 @@ fn convert_file(input: &Path, out_dir: &Path, stereo: bool) -> Result<(), String
 
     let channels = if stereo { "2" } else { "1" };
 
+    let input_str = input.to_str()
+        .ok_or_else(|| format!("path contains non-UTF-8: {:?}", input))?;
+    let out_str = out.to_str()
+        .ok_or_else(|| format!("path contains non-UTF-8: {:?}", out))?;
+
     let status = Command::new("ffmpeg")
         .args([
             "-i",
-            &input.display().to_string(),
+            input_str,
             "-ac",
             channels,
             "-c:a",
             "aac",
             "-b:a",
             "96k",
-            &out.display().to_string(),
+            out_str,
         ])
         .status()
         .map_err(|e| format!("ffmpeg exec: {}", e))?;

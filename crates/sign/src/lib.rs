@@ -37,10 +37,15 @@ pub fn sign_dir(folder: &Path, prefix: &str) -> Result<(), String> {
             format!("{:x}", h.finalize())
         };
 
-        let display = path.display().to_string();
+        let rel = path.strip_prefix(folder)
+            .map_err(|e| e.to_string())?;
+        let display = rel.display().to_string();
         md5_lines.push(format!("{}  {}", md5_hash, display));
         sha1_lines.push(format!("{}  {}", sha1_hash, display));
     }
+
+    md5_lines.sort();
+    sha1_lines.sort();
 
     let md5_path = format!("{}.md5", prefix);
     let sha1_path = format!("{}.sha1", prefix);
@@ -146,6 +151,27 @@ mod tests {
         let line = sha1_content.lines().next().unwrap();
         let hash = line.splitn(2, "  ").next().unwrap();
         assert_eq!(hash.len(), 40, "sha1 hash must be 40 hex chars");
+    }
+
+    #[test]
+    fn test_sign_relative_paths() {
+        let src = tempdir().unwrap();
+        let out = tempdir().unwrap();
+        let prefix = out.path().join("cs").to_string_lossy().into_owned();
+
+        write_file(&src.path().join("file.bin"), b"data");
+
+        run(SignArgs {
+            folder: src.path(),
+            prefix: &prefix,
+        })
+        .unwrap();
+
+        let md5_content = fs::read_to_string(format!("{}.md5", prefix)).unwrap();
+        let line = md5_content.lines().next().unwrap();
+        let path_part = line.splitn(2, "  ").nth(1).unwrap();
+        assert!(!path_part.starts_with('/'), "path must be relative, got: {}", path_part);
+        assert!(path_part.contains("file.bin"));
     }
 
     #[test]

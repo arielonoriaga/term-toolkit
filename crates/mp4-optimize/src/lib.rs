@@ -73,6 +73,15 @@ impl Quality {
             Quality::Web => "3.0",
         }
     }
+
+    fn profile(self) -> &'static str {
+        match self {
+            Quality::High => "high",
+            Quality::Medium => "main",
+            Quality::Low => "baseline",
+            Quality::Web => "baseline",
+        }
+    }
 }
 
 pub struct Mp4OptimizeArgs<'a> {
@@ -97,7 +106,7 @@ pub fn run(args: Mp4OptimizeArgs) -> Result<(), String> {
 
 fn run_file_mode(input: &Path, output_dir: Option<&Path>, quality: Quality) -> Result<(), String> {
     if !is_mp4(input) {
-        return Err(format!("no MP4 files found in {}", input.display()));
+        return Err(format!("not an MP4 file: {}", input.display()));
     }
     let out_dir = output_dir
         .map(|p| p.to_path_buf())
@@ -157,7 +166,7 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
     let bitrate = quality.video_bitrate();
     let bufsize = {
         let n: u32 = bitrate.trim_end_matches('k').parse()
-            .expect("internal: video_bitrate must be Nk format");
+            .map_err(|_| format!("internal: bad bitrate format: {}", bitrate))?;
         format!("{}k", n * 2)
     };
     let max_w = quality.max_w().to_string();
@@ -168,11 +177,16 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
     );
     let audio = quality.audio_bitrate();
 
+    let input_str = input.to_str()
+        .ok_or_else(|| format!("path contains non-UTF-8: {:?}", input))?;
+    let out_str = out.to_str()
+        .ok_or_else(|| format!("path contains non-UTF-8: {:?}", out))?;
+
     let status = Command::new("ffmpeg")
         .args([
-            "-i", &input.display().to_string(),
+            "-i", input_str,
             "-c:v", "libx264",
-            "-profile:v", "baseline",
+            "-profile:v", quality.profile(),
             "-level:v", quality.level(),
             "-crf", &crf,
             "-maxrate", bitrate,
@@ -187,7 +201,7 @@ fn convert_file(input: &Path, out_dir: &Path, quality: Quality) -> Result<(), St
             "-preset", "slow",
             "-tune", "film",
             "-y",
-            &out.display().to_string(),
+            out_str,
         ])
         .status()
         .map_err(|e| format!("ffmpeg exec: {}", e))?;
@@ -269,6 +283,14 @@ mod tests {
     }
 
     #[test]
+    fn test_quality_profiles() {
+        assert_eq!(Quality::High.profile(), "high");
+        assert_eq!(Quality::Medium.profile(), "main");
+        assert_eq!(Quality::Low.profile(), "baseline");
+        assert_eq!(Quality::Web.profile(), "baseline");
+    }
+
+    #[test]
     fn test_mp4_missing_input_err() {
         let tmp = tempdir().unwrap();
         let result = run(Mp4OptimizeArgs {
@@ -295,6 +317,23 @@ mod tests {
         match result {
             Err(e) if e.contains("ffmpeg not found") => {}
             Err(e) => assert!(e.contains("no MP4 files"), "unexpected: {}", e),
+            Ok(()) => panic!("expected error"),
+        }
+    }
+
+    #[test]
+    fn test_mp4_single_file_not_mp4_err() {
+        let tmp = tempdir().unwrap();
+        let f = tmp.path().join("video.avi");
+        touch(&f);
+        let result = run(Mp4OptimizeArgs {
+            input: &f,
+            output_dir: None,
+            quality: Quality::Web,
+        });
+        match result {
+            Err(e) if e.contains("ffmpeg not found") => {}
+            Err(e) => assert!(e.contains("not an MP4 file"), "unexpected: {}", e),
             Ok(()) => panic!("expected error"),
         }
     }
