@@ -1,0 +1,10 @@
+[package]
+name = "ttk-copy-clean"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ttk-core = { path = "../core" }
+
+[dev-dependencies]
+tempfile = "3"
