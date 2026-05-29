@@ -20,8 +20,10 @@ pub fn run(args: CloneArgs) -> Result<(), String> {
         .map(|p| p.to_path_buf())
         .unwrap_or_else(|| PathBuf::from(repo_name));
 
+    let target_str = target.to_str()
+        .ok_or_else(|| "output path is not valid UTF-8".to_string())?;
     let status = Command::new("git")
-        .args(["clone", args.url, target.to_str().unwrap()])
+        .args(["clone", args.url, target_str])
         .status()
         .map_err(|e| e.to_string())?;
     if !status.success() {
