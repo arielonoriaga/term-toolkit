@@ -60,6 +60,36 @@ enum Commands {
         #[arg(long)]
         output_dir: Option<PathBuf>,
     },
+    /// Generate MD5 and SHA1 checksums for all files in a folder
+    Sign {
+        folder: PathBuf,
+        prefix: String,
+    },
+    /// Copy a directory tree, stripping build artifacts and checksums
+    CopyClean {
+        source: PathBuf,
+        dest: PathBuf,
+    },
+    /// Copy-clean, sign, and zip a source directory
+    BuildAndSign {
+        source: PathBuf,
+        prefix: String,
+    },
+    /// Compress MP3 files to M4A via ffmpeg
+    Mp3Compress {
+        #[arg(default_value = ".")]
+        input: PathBuf,
+        output_dir: Option<PathBuf>,
+    },
+    /// Optimize MP4 files via ffmpeg
+    Mp4Optimize {
+        #[arg(default_value = ".")]
+        input: PathBuf,
+        output_dir: Option<PathBuf>,
+        /// Quality preset: high | medium | low | web
+        #[arg(long, default_value = "web")]
+        quality: String,
+    },
 }
 
 fn parse_since_date(s: &str) -> Result<DateTime<Local>, String> {
@@ -110,6 +140,38 @@ fn run_command(cli: Cli) -> Result<(), String> {
                 until: until.as_deref().map(parse_until_date).transpose()?,
                 last,
                 output_dir,
+            })
+        }
+        Commands::Sign { folder, prefix } => {
+            ttk_sign::run(ttk_sign::SignArgs {
+                folder: &folder,
+                prefix: &prefix,
+            })
+        }
+        Commands::CopyClean { source, dest } => {
+            ttk_copy_clean::run(ttk_copy_clean::CopyCleanArgs {
+                source: &source,
+                dest: &dest,
+            })
+        }
+        Commands::BuildAndSign { source, prefix } => {
+            ttk_build_and_sign::run(ttk_build_and_sign::BuildAndSignArgs {
+                source: &source,
+                prefix: &prefix,
+            })
+        }
+        Commands::Mp3Compress { input, output_dir } => {
+            ttk_mp3_compress::run(ttk_mp3_compress::Mp3CompressArgs {
+                input: &input,
+                output_dir: output_dir.as_deref(),
+            })
+        }
+        Commands::Mp4Optimize { input, output_dir, quality } => {
+            let q = ttk_mp4_optimize::Quality::parse(&quality)?;
+            ttk_mp4_optimize::run(ttk_mp4_optimize::Mp4OptimizeArgs {
+                input: &input,
+                output_dir: output_dir.as_deref(),
+                quality: q,
             })
         }
     }

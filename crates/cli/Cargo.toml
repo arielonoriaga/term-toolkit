@@ -16,3 +16,8 @@ ttk-rename = { path = "../rename" }
 ttk-optimize = { path = "../optimize" }
 ttk-clone-repo = { path = "../clone-repo" }
 ttk-git-digest = { path = "../git-digest" }
+ttk-sign = { path = "../sign" }
+ttk-copy-clean = { path = "../copy-clean" }
+ttk-build-and-sign = { path = "../build-and-sign" }
+ttk-mp3-compress = { path = "../mp3-compress" }
+ttk-mp4-optimize = { path = "../mp4-optimize" }
