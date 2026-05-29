@@ -24,8 +24,11 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
 
     let clean_display = clean_path.display().to_string();
     if let Err(e) = copy_clean_dir(args.source, clean_path, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS) {
-        let _ = std::fs::remove_dir_all(clean_path);
-        return Err(format!("{e} (partial copy cleaned up at {clean_display})"));
+        let cleanup_msg = match std::fs::remove_dir_all(clean_path) {
+            Ok(()) => format!("partial copy cleaned up at {clean_display}"),
+            Err(ce) => format!("partial copy NOT cleaned at {clean_display}: {ce}"),
+        };
+        return Err(format!("{e} ({cleanup_msg})"));
     }
 
     let result = sign_and_zip(clean_path, args.prefix);
