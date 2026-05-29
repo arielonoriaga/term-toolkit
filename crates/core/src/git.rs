@@ -47,7 +47,7 @@ pub fn git_log(
     let output = Command::new("git")
         .args([
             "-C",
-            repo.to_str().unwrap_or(""),
+            repo.to_str().ok_or_else(|| format!("non-UTF-8 repo path: {:?}", repo))?,
             "log",
             "--format=%H%x00%ae%x00%an%x00%s%x00%ad",
             "--date=format:%Y-%m-%dT%H:%M:%S",
@@ -75,7 +75,9 @@ fn parse_commit_line(line: &str, repo: &Path) -> Option<Commit> {
         return None;
     }
     let date = NaiveDateTime::parse_from_str(parts[4], "%Y-%m-%dT%H:%M:%S").ok()?;
-    let date = date.and_local_timezone(Local).single()?;
+    let date = date.and_local_timezone(Local)
+        .earliest()
+        .or_else(|| date.and_local_timezone(Local).latest())?;
     Some(Commit {
         hash: parts[0].to_string(),
         email: parts[1].to_string(),
@@ -137,6 +139,10 @@ mod tests {
         assert_eq!(commit.email, "user@example.com");
         assert_eq!(commit.author_name, "User Name");
         assert_eq!(commit.subject, "feat: add thing");
+        assert_eq!(
+            commit.date.format("%Y-%m-%dT%H:%M:%S").to_string(),
+            "2026-05-28T10:30:00"
+        );
     }
 
     #[test]
