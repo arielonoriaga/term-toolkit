@@ -1,6 +1,7 @@
 use sha1::{Digest, Sha1};
 use std::fs;
 use std::path::Path;
+use ttk_core::tlog;
 use walkdir::WalkDir;
 
 pub struct SignArgs<'a> {
@@ -12,50 +13,63 @@ pub fn sign_dir(folder: &Path, prefix: &str) -> Result<(), String> {
     let mut md5_lines: Vec<String> = Vec::new();
     let mut sha1_lines: Vec<String> = Vec::new();
 
-    for entry in WalkDir::new(folder)
+    // collect files — skip .md5/.sha1 case-insensitively
+    let files: Vec<_> = WalkDir::new(folder)
         .follow_links(false)
         .into_iter()
         .filter(|e| {
             e.as_ref().map(|e| {
-                let ext = e.path().extension().and_then(|x| x.to_str()).unwrap_or("");
+                let ext = e.path()
+                    .extension()
+                    .and_then(|x| x.to_str())
+                    .unwrap_or("")
+                    .to_lowercase();
                 ext != "md5" && ext != "sha1"
             }).unwrap_or(true)
         })
-    {
-        let entry = entry.map_err(|e| format!("walk error: {}", e))?;
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().is_file())
+        .collect();
+
+    tlog(&format!("Found {} files to process...", files.len()));
+    tlog("Generating MD5 checksums...");
+
+    for entry in &files {
         let path = entry.path();
-        if !path.is_file() {
-            continue;
-        }
         let bytes = fs::read(path)
             .map_err(|e| format!("read {}: {}", path.display(), e))?;
-
         let md5_hash = format!("{:x}", md5::compute(&bytes));
+        let rel = path.strip_prefix(folder).map_err(|e| e.to_string())?;
+        md5_lines.push(format!("{}  {}", md5_hash, rel.display()));
+    }
+
+    let md5_path = format!("{}.md5", prefix);
+    md5_lines.sort();
+    fs::write(&md5_path, md5_lines.join("\n") + "\n")
+        .map_err(|e| format!("write {}: {}", md5_path, e))?;
+    tlog(&format!("MD5 checksums generated: {}", md5_path));
+
+    tlog(&format!("Generating SHA1 checksums for {} files (this may take a while)...", files.len()));
+
+    for entry in &files {
+        let path = entry.path();
+        let bytes = fs::read(path)
+            .map_err(|e| format!("read {}: {}", path.display(), e))?;
         let sha1_hash = {
             let mut h = Sha1::new();
             h.update(&bytes);
             format!("{:x}", h.finalize())
         };
-
-        let rel = path.strip_prefix(folder)
-            .map_err(|e| e.to_string())?;
-        let display = rel.display().to_string();
-        md5_lines.push(format!("{}  {}", md5_hash, display));
-        sha1_lines.push(format!("{}  {}", sha1_hash, display));
+        let rel = path.strip_prefix(folder).map_err(|e| e.to_string())?;
+        sha1_lines.push(format!("{}  {}", sha1_hash, rel.display()));
     }
 
-    md5_lines.sort();
-    sha1_lines.sort();
-
-    let md5_path = format!("{}.md5", prefix);
     let sha1_path = format!("{}.sha1", prefix);
-
-    fs::write(&md5_path, md5_lines.join("\n") + "\n")
-        .map_err(|e| format!("write {}: {}", md5_path, e))?;
+    sha1_lines.sort();
     fs::write(&sha1_path, sha1_lines.join("\n") + "\n")
         .map_err(|e| format!("write {}: {}", sha1_path, e))?;
+    tlog(&format!("SHA1 checksums generated: {}", sha1_path));
 
-    println!("wrote {} and {}", md5_path, sha1_path);
     Ok(())
 }
 

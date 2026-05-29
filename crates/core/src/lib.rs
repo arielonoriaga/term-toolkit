@@ -4,6 +4,11 @@ pub mod markdown;
 pub mod output;
 pub mod prompt;
 
+pub fn tlog(msg: &str) {
+    let now = chrono::Local::now();
+    println!("[{}] {}", now.format("%Y-%m-%d %H:%M:%S"), msg);
+}
+
 pub fn check_ffmpeg() -> Result<(), String> {
     std::process::Command::new("ffmpeg")
         .arg("-version")

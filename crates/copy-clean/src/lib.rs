@@ -1,5 +1,6 @@
 use std::path::Path;
 use ttk_core::fs_utils::{copy_clean_dir, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS};
+use ttk_core::tlog;
 
 pub struct CopyCleanArgs<'a> {
     pub source: &'a Path,
@@ -14,9 +15,13 @@ pub fn run(args: CopyCleanArgs) -> Result<(), String> {
         return Err(format!("destination already exists: {}", args.dest.display()));
     }
 
+    tlog(&format!(
+        "EXECUTING: Copying files from {} excluding {} and checksum files...",
+        args.source.display(),
+        DEFAULT_SKIP_DIRS.join(", ")
+    ));
     copy_clean_dir(args.source, args.dest, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS)?;
-
-    println!("copied {} → {}", args.source.display(), args.dest.display());
+    tlog(&format!("Done: clean copy at {}", args.dest.display()));
     Ok(())
 }
 

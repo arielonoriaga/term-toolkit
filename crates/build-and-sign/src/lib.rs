@@ -2,6 +2,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use ttk_core::fs_utils::{copy_clean_dir, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS};
+use ttk_core::tlog;
 use walkdir::WalkDir;
 use zip::write::SimpleFileOptions;
 
@@ -22,6 +23,11 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
         return Err(format!("{} already exists", clean_dir));
     }
 
+    tlog(&format!("Step 1: Creating clean copy → {}...", clean_dir));
+    tlog(&format!(
+        "EXECUTING: Copying files excluding {}, and checksum files...",
+        DEFAULT_SKIP_DIRS.join(", ")
+    ));
     let clean_display = clean_path.display().to_string();
     if let Err(e) = copy_clean_dir(args.source, clean_path, DEFAULT_SKIP_DIRS, DEFAULT_SKIP_EXTS) {
         let cleanup_msg = match std::fs::remove_dir_all(clean_path) {
@@ -31,6 +37,9 @@ pub fn run(args: BuildAndSignArgs) -> Result<(), String> {
         return Err(format!("{e} ({cleanup_msg})"));
     }
 
+    tlog(&format!("Verified: {} excluded from clean copy", DEFAULT_SKIP_DIRS.join(", ")));
+
+    tlog("Step 2: Generating checksums for clean copy...");
     let result = sign_and_zip(clean_path, args.prefix);
 
     if let Err(e) = fs::remove_dir_all(clean_path) {
@@ -44,9 +53,14 @@ fn sign_and_zip(clean_path: &Path, prefix: &str) -> Result<(), String> {
     ttk_sign::sign_dir(clean_path, prefix)?;
 
     let zip_path = format!("{}.zip", prefix);
+    tlog(&format!("Step 3: Creating archive: {}...", zip_path));
     zip_dir(clean_path, &zip_path)?;
+    tlog(&format!("Archive created: {}", zip_path));
 
-    println!("created {}, {}.md5, {}.sha1", zip_path, prefix, prefix);
+    tlog("Done:");
+    tlog(&format!("  → {}", zip_path));
+    tlog(&format!("  → {}.md5", prefix));
+    tlog(&format!("  → {}.sha1", prefix));
     Ok(())
 }
 
