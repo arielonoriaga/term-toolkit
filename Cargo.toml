@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "crates/cli",
+    "crates/core",
+    "crates/deleter",
+    "crates/rename",
+    "crates/optimize",
+    "crates/clone-repo",
+    "crates/git-digest",
+]
+resolver = "2"

@@ -1,0 +1,18 @@
+[package]
+name = "ttk"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ttk"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+chrono = "0.4"
+ttk-core = { path = "../core" }
+ttk-deleter = { path = "../deleter" }
+ttk-rename = { path = "../rename" }
+ttk-optimize = { path = "../optimize" }
+ttk-clone-repo = { path = "../clone-repo" }
+ttk-git-digest = { path = "../git-digest" }

@@ -1,0 +1,10 @@
+[package]
+name = "ttk-optimize"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+image = "0.25"
+
+[dev-dependencies]
+tempfile = "3"
