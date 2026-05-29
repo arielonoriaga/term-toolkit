@@ -56,18 +56,19 @@ impl Prompt {
     pub fn select_authors(summaries: &[AuthorSummary]) -> Vec<String> {
         let options: Vec<String> = summaries
             .iter()
-            .map(|a| format!("{} ({} commits, {} repos)", a.name, a.commit_count, a.repo_count))
+            .enumerate()
+            .map(|(i, a)| format!("[{}] {} ({} commits, {} repos)", i, a.name, a.commit_count, a.repo_count))
             .collect();
         loop {
             let selected = MultiSelect::new("Select authors:", options.clone())
                 .prompt()
                 .unwrap_or_else(|_| std::process::exit(0));
             if !selected.is_empty() {
-                return summaries
+                return options
                     .iter()
-                    .zip(options.iter())
+                    .enumerate()
                     .filter(|(_, opt)| selected.contains(opt))
-                    .map(|(a, _)| a.email.clone())
+                    .map(|(i, _)| summaries[i].email.clone())
                     .collect();
             }
             eprintln!("Select at least one author.");

@@ -51,8 +51,8 @@ pub fn git_log(
             "log",
             "--format=%H%x00%ae%x00%an%x00%s%x00%ad",
             "--date=format:%Y-%m-%dT%H:%M:%S",
-            &format!("--after={}", since.format("%Y-%m-%dT%H:%M:%S")),
-            &format!("--before={}", until.format("%Y-%m-%dT%H:%M:%S")),
+            &format!("--after={}", (*since - chrono::Duration::seconds(1)).format("%Y-%m-%dT%H:%M:%S")),
+            &format!("--before={}", (*until + chrono::Duration::seconds(1)).format("%Y-%m-%dT%H:%M:%S")),
         ])
         .output()
         .map_err(|e| e.to_string())?;

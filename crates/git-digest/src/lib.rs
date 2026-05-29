@@ -13,7 +13,7 @@ pub struct GitDigestArgs {
     pub since: Option<DateTime<Local>>,
     pub until: Option<DateTime<Local>>,
     pub last: Option<String>,
-    pub output: Option<PathBuf>,
+    pub output_dir: Option<PathBuf>,
 }
 
 pub fn resolve_last(last: &str) -> Result<(DateTime<Local>, DateTime<Local>), String> {
@@ -31,6 +31,9 @@ pub fn run(args: GitDigestArgs) -> Result<(), String> {
     // Step 1: Validate + scan
     if !args.dir.exists() {
         return Err(format!("directory not found: {}", args.dir.display()));
+    }
+    if args.last.is_some() && (args.since.is_some() || args.until.is_some()) {
+        return Err("--last cannot be combined with --since or --until".to_string());
     }
     println!("{}", "Scanning for repositories...".dimmed());
     let repos = scan_repos(&args.dir);
@@ -50,17 +53,12 @@ pub fn run(args: GitDigestArgs) -> Result<(), String> {
             args.until.unwrap_or(now),
         )
     } else {
-        // No TTY guard: if stdin is not a terminal and no flags given, error
-        #[cfg(unix)]
-        {
-            use std::os::unix::io::AsRawFd;
-            let is_tty = unsafe { libc::isatty(std::io::stdin().as_raw_fd()) } != 0;
-            if !is_tty {
-                return Err(
-                    "no TTY detected and no date flags given — use --last or --since/--until"
-                        .to_string(),
-                );
-            }
+        use std::io::IsTerminal;
+        if !std::io::stdin().is_terminal() {
+            return Err(
+                "no TTY detected and no date flags given — use --last or --since/--until"
+                    .to_string(),
+            );
         }
         Prompt::date_range()
     };
@@ -151,7 +149,7 @@ pub fn run(args: GitDigestArgs) -> Result<(), String> {
     TermOutput::print_digest(&groups);
 
     let md_filename = format!("git-digest-{}.md", Local::now().format("%Y-%m-%d"));
-    let md_dir = args.output.as_deref().unwrap_or(&args.dir);
+    let md_dir = args.output_dir.as_deref().unwrap_or(&args.dir);
     let md_path = md_dir.join(&md_filename);
 
     if md_path.exists() {
